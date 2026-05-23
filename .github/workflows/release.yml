@@ -1,0 +1,23 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          package="screens-templates-${GITHUB_REF_NAME}"
+          mkdir -p "dist/$package"
+          rsync -a gitci/ "dist/$package/gitci/"
+          cp README.md LICENSE "dist/$package/"
+          tar -czf "dist/$package.tar.gz" -C dist "$package"
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.tar.gz
