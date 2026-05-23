@@ -29,12 +29,14 @@ jobs:
       - run: cd screens-tool/js && pnpm --filter @gitci/screens-renderer-node exec playwright install --with-deps chromium
       - run: cd screens-tool && swift build
       - run: ./screens-tool/.build/debug/gitci-screens init "$RUNNER_TEMP/screens-template-smoke" --name "Template Smoke"
-      - run: ./screens-tool/.build/debug/gitci-screens validate "$RUNNER_TEMP/screens-template-smoke"
+      - run: ./screens-tool/.build/debug/gitci-screens validate "$RUNNER_TEMP/screens-template-smoke" --strict
         env:
           GITCI_SCREENS_JS_WORKSPACE: ${{ github.workspace }}/screens-tool/js
           GITCI_SCREENS_TEMPLATES_ROOT: ${{ github.workspace }}/screens-templates/gitci/screens
-      - run: ./screens-tool/.build/debug/gitci-screens build "$RUNNER_TEMP/screens-template-smoke"
+      - run: ./screens-tool/.build/debug/gitci-screens export "$RUNNER_TEMP/screens-template-smoke" --strict
         env:
           GITCI_SCREENS_JS_WORKSPACE: ${{ github.workspace }}/screens-tool/js
           GITCI_SCREENS_TEMPLATES_ROOT: ${{ github.workspace }}/screens-templates/gitci/screens
       - run: test -f "$RUNNER_TEMP/screens-template-smoke/gitci/screens/build/launch/appstore.iphone.6_9.portrait/01-hero.png"
+      - run: test -f "$RUNNER_TEMP/screens-template-smoke/gitci/screens/build/launch/gallery/index.html"
+      - run: test -f "$RUNNER_TEMP/screens-template-smoke/gitci/screens/build/launch.zip"
