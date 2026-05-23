@@ -1,0 +1,9 @@
+{
+  "$schema": "https://screens.gitci.com/schemas/project.gitci.schema.json",
+  "schemaVersion": 1,
+  "id": "gitci.screens.templates",
+  "name": "GitCI Screens Templates",
+  "assetPolicy": {
+    "allowRemoteAssets": false
+  }
+}
