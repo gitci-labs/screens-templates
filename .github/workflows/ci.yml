@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  render-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: screens-templates
+      - uses: actions/checkout@v4
+        with:
+          repository: gitci-labs/screens
+          path: screens-tool
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.28.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: screens-tool/js/pnpm-lock.yaml
+      - run: cd screens-tool/js && pnpm install --frozen-lockfile
+      - run: cd screens-tool/js && pnpm build
+      - run: cd screens-tool/js && pnpm --filter @gitci/screens-renderer-node exec playwright install --with-deps chromium
+      - run: cd screens-tool && swift build
+      - run: ./screens-tool/.build/debug/gitci-screens init "$RUNNER_TEMP/screens-template-smoke" --name "Template Smoke"
+      - run: ./screens-tool/.build/debug/gitci-screens validate "$RUNNER_TEMP/screens-template-smoke"
+        env:
+          GITCI_SCREENS_JS_WORKSPACE: ${{ github.workspace }}/screens-tool/js
+          GITCI_SCREENS_TEMPLATES_ROOT: ${{ github.workspace }}/screens-templates/gitci/screens
+      - run: ./screens-tool/.build/debug/gitci-screens build "$RUNNER_TEMP/screens-template-smoke"
+        env:
+          GITCI_SCREENS_JS_WORKSPACE: ${{ github.workspace }}/screens-tool/js
+          GITCI_SCREENS_TEMPLATES_ROOT: ${{ github.workspace }}/screens-templates/gitci/screens
+      - run: test -f "$RUNNER_TEMP/screens-template-smoke/gitci/screens/build/launch/appstore.iphone.6_9.portrait/01-hero.png"
